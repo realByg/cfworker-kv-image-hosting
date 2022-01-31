@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	@apply scroll-smooth text-base bg-slate-300 select-none;
+}
+
+svg {
+	@apply cursor-pointer;
+}
