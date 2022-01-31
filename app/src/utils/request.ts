@@ -2,6 +2,7 @@ import axios from 'axios'
 import { ElNotification } from 'element-plus'
 import store from '../plugins/store'
 import { getBasicToken } from './local-storage'
+import type { ConvertedImg } from './types'
 
 const request = axios.create({
 	baseURL: import.meta.env.VITE_APP_API_URL,
@@ -57,4 +58,10 @@ request.interceptors.response.use(
 	}
 )
 
-export default request
+export const requestLogin = () => request.get('/api/login')
+
+export const requestGetImgs = () => request.get('/api/imgs')
+
+export const requestUploadImgs = (data: ConvertedImg[]) => request.post('/api/imgs', { data })
+
+export const requestDeleteImgs = (data: string[]) => request.delete('/api/imgs', { data })

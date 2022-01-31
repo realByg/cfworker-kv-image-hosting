@@ -3,7 +3,6 @@ import App from './App.vue'
 import router from './plugins/router'
 import store from './plugins/store'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { ElCollapseTransition } from 'element-plus'
 
 import 'element-plus/dist/index.css'
 import './app.css'
@@ -13,5 +12,4 @@ const app = createApp(App)
 app.use(router)
 app.use(store)
 app.component('font-awesome-icon', FontAwesomeIcon)
-app.component(ElCollapseTransition.name, ElCollapseTransition)
 app.mount('#app')

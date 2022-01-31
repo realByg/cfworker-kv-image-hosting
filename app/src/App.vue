@@ -47,7 +47,12 @@
 				</div>
 
 				<div class="min-h-[calc(100vh-64px-64px)] overflow-auto">
-					<router-view v-if="!loginAreaVisible" />
+					<!-- <router-view v-if="!loginAreaVisible" /> -->
+					<router-view v-slot="{ Component }" v-if="!loginAreaVisible">
+						<keep-alive>
+							<component :is="Component" />
+						</keep-alive>
+					</router-view>
 				</div>
 
 				<div class="w-full h-16 flex items-center justify-center text-gray-500 text-sm">

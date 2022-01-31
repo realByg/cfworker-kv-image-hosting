@@ -1,5 +1,5 @@
 import { Router, validate } from '@cfworker/web'
-import basicAuth, { verifyBasicAuth } from './plugins/basic-auth'
+import basicAuth from './plugins/basic-auth'
 import cors from './plugins/cors'
 
 const router = new Router()
@@ -21,21 +21,15 @@ router.get(
 	}
 )
 
-router.post('/api/login', basicAuth, ({ res }) => {
+router.get('/api/login', basicAuth, ({ res }) => {
 	res.status = 200
 })
 
-router.get('/api/imgs', basicAuth, ({ res }) => {
-	res.status = 200
-})
+router.get('/api/imgs', basicAuth, ({ res }) => {})
 
-router.post('/api/imgs', basicAuth, ({ req, res }) => {
-	res.status = 200
-})
+router.post('/api/imgs', basicAuth, ({ req, res }) => {})
 
-router.delete('/api/imgs', basicAuth, ({ req, res }) => {
-	res.status = 200
-})
+router.delete('/api/imgs', basicAuth, ({ req, res }) => {})
 
 // cors options
 router.all('/(.*)', ({ res }) => {

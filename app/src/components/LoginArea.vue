@@ -55,7 +55,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { repoLink, appName } from '../utils/vars'
 import LoadingOverlay from './LoadingOverlay.vue'
 import { useStore } from 'vuex'
-import { apiLogin } from '../utils/apis'
+import { requestLogin } from '../utils/request'
 import { setBasicToken, removeBasicToken } from '../utils/local-storage'
 
 const username = ref('')
@@ -69,7 +69,7 @@ const doLogin = () => {
 	const basicToken = btoa(`${username.value}:${password.value}`)
 	setBasicToken(basicToken)
 
-	apiLogin()
+	requestLogin()
 		.then(() => {
 			store.commit('setLoginAreaVisible', false)
 		})
