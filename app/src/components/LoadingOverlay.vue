@@ -11,7 +11,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 const props = defineProps({

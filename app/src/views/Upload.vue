@@ -6,7 +6,7 @@
 		</div>
 
 		<div class="border-2 border-dashed border-slate-400 rounded-md relative">
-			<LoadingOverlay :loading="loading" />
+			<loading-overlay :loading="loading" />
 
 			<div class="grid p-4 gap-4 grid-cols-3" @drop.prevent="onFileDrop" @dragover.prevent>
 				<div v-if="imgList.length === 0" class="col-span-3">
@@ -21,21 +21,22 @@
 				<div class="col-span-3 md:col-span-1" v-for="img in imgList" :key="img.id">
 					<div class="w-full bg-slate-200 rounded-md shadow-sm overflow-hidden relative">
 						<img
-							class="block w-full h-60 object-cover cursor-pointer"
+							class="block w-full h-60 object-cover cursor-zoom-in"
 							:src="img.dataURL"
+							@click="viewImg(img.id)"
 						/>
 						<div
 							class="w-full p-2 absolute left-0 bottom-0 bg-slate-800/50 backdrop-blur-sm"
 						>
 							<div class="w-full flex items-center">
 								<div class="flex-1 w-full truncate text-white">
-									<ElTooltip :content="img.name" placement="top-start">
+									<el-tooltip :content="img.name" placement="top-start">
 										{{ img.name }}
-									</ElTooltip>
+									</el-tooltip>
 								</div>
 								<font-awesome-icon
 									:icon="faTimesCircle"
-									class="text-red-500"
+									class="text-red-500 cursor-pointer"
 									@click="removeImg(img.id)"
 								></font-awesome-icon>
 							</div>
@@ -48,9 +49,9 @@
 			</div>
 		</div>
 
-		<div class="w-full mt-4 flex items-center text-sm text-gray-500">
-			<ElCheckbox class="h-6" v-model="imgsHasExpiration" size="large" label="过期删除" />
-			<ElDatePicker
+		<div v-if="imgList.length" class="w-full mt-4 flex items-center text-sm text-gray-500">
+			<el-checkbox class="h-6" v-model="imgsHasExpiration" size="large" label="过期删除" />
+			<el-date-picker
 				v-if="imgsHasExpiration"
 				v-model="imgsExpireAt"
 				popper-class="remove-now-btn"
@@ -82,7 +83,11 @@
 
 			<div class="md:col-span-1 col-span-3">
 				<div
-					class="w-full h-10 bg-red-500 cursor-pointer flex items-center justify-center text-white"
+					:class="`${
+						imgList.length
+							? 'cursor-pointer bg-red-500'
+							: 'cursor-not-allowed bg-red-300 active:pointer-events-none'
+					} w-full h-10 flex items-center justify-center text-white`"
 					@click="imgList = []"
 				>
 					<font-awesome-icon :icon="faTrashAlt" class="mr-2"></font-awesome-icon>
@@ -92,7 +97,12 @@
 
 			<div class="md:col-span-1 col-span-5">
 				<div
-					class="w-full h-10 bg-green-500 cursor-pointer flex items-center justify-center text-white"
+					:class="`${
+						imgList.length
+							? 'bg-green-500 cursor-pointer'
+							: 'bg-green-300 cursor-not-allowed active:pointer-events-none'
+					} w-full h-10 flex items-center justify-center text-white`"
+					@click="uploadImgs"
 				>
 					<font-awesome-icon :icon="faUpload" class="mr-2"></font-awesome-icon>
 					上传
@@ -112,78 +122,40 @@
 </template>
 
 <script setup lang="ts">
-import { faImages, faTrashAlt, faCopy } from '@fortawesome/free-regular-svg-icons'
-import { faUpload, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
-import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import { faImages, faTrashAlt, faCopy, faTimesCircle } from '@fortawesome/free-regular-svg-icons'
+import { faUpload } from '@fortawesome/free-solid-svg-icons'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { ConvertedImg } from '../utils/types'
 import { MD5 } from 'crypto-js'
 import LoadingOverlay from '../components/LoadingOverlay.vue'
 import { formatBytes } from '../utils/format-bytes'
-import { ElMessage, ElTooltip, ElCheckbox, ElDatePicker } from 'element-plus'
+import { ElNotification, ElTooltip, ElCheckbox, ElDatePicker } from 'element-plus'
+import { api as imgViewer } from 'v-viewer'
 
-const imgSizeLimit = 10 * 1024 * 1024
+const imgSizeLimit = 20 * 1024 * 1024
 const input = ref<HTMLInputElement>()
 const imgList = ref<ConvertedImg[]>([])
 const loading = ref(false)
 const imgTotalSize = computed(() => imgList.value.reduce((a, i) => a + i.dataURL.length, 0))
 const imgsHasExpiration = ref(false)
 const imgsExpireAt = ref('')
-watchEffect(() => console.log(imgsExpireAt.value))
 
-const addToImgList = (files: FileList | null | undefined) => {
-	if (!files) return
-
-	for (let i = 0; i < files.length; i++) {
-		const file = files.item(i)
-		if (!file) return
-		if (file.size > imgSizeLimit) return
-
-		const fileReader = new FileReader()
-		fileReader.readAsDataURL(file)
-		fileReader.onloadstart = () => {
-			loading.value = true
-		}
-		fileReader.onloadend = () => {
-			if (i === files.length - 1) {
-				loading.value = false
-			}
-
-			const fileDataURL = String(fileReader.result)
-			if (!fileDataURL.startsWith('data:image/')) {
-				ElMessage({
-					message: `${file.name} 不是图片文件`,
-					type: 'error'
-				})
-				return
-			}
-
-			const imgID = MD5(fileDataURL).toString()
-			const imgType = fileDataURL.match(/data:(image\/.*);base64/)?.[1] || 'image/jpeg'
-			const imgExists = imgList.value.some((img) => img.id === imgID)
-			if (imgExists) return
-
-			imgList.value = [
-				...imgList.value,
-				{
-					id: imgID,
-					name: file.name,
-					type: imgType,
-					modifiedAt: file.lastModified,
-					dataURL: fileDataURL
-				}
-			]
-		}
+watch(
+	() => imgsExpireAt.value,
+	() => {
+		imgList.value = imgList.value.map((img) => ({
+			...img,
+			expiresAt: new Date(imgsExpireAt.value).getTime()
+		}))
 	}
-}
+)
 
 const onInputChange = () => {
 	addToImgList(input.value?.files)
 }
-
 const onFileDrop = (e: DragEvent) => {
 	addToImgList(e.dataTransfer?.files)
 }
-
 const onPaste = (e: ClipboardEvent) => {
 	addToImgList(e.clipboardData?.files)
 }
@@ -196,8 +168,77 @@ onUnmounted(() => {
 	document.onpaste = null
 })
 
+const viewImg = (imgID: string) => {
+	imgViewer({
+		images: imgList.value.map((img) => img.dataURL),
+		options: {
+			initialViewIndex: imgList.value.findIndex((img) => img.id === imgID)
+		}
+	})
+}
+
 const removeImg = (imgID: string) => {
 	imgList.value = imgList.value.filter((img) => img.id !== imgID)
+}
+
+const addToImgList = async (files: FileList | null | undefined) => {
+	if (!files) return
+
+	loading.value = true
+	for (let i = 0; i < files.length; i++) {
+		const file = files.item(i)
+		if (!file) return
+		if (file.size > imgSizeLimit) {
+			ElNotification({
+				message: `${file.name} 文件过大`,
+				type: 'error'
+			})
+			continue
+		}
+
+		const fileDataURL = await fileToDataURL(file)
+		if (!fileDataURL.startsWith('data:image/')) {
+			ElNotification({
+				message: `${file.name} 不是图片文件`,
+				type: 'error'
+			})
+			continue
+		}
+
+		const imgID = MD5(fileDataURL).toString()
+		const imgType = fileDataURL.match(/data:(image\/.*);base64/)?.[1] || 'image/jpeg'
+		const imgExists = imgList.value.some((img) => img.id === imgID)
+		if (imgExists) continue
+
+		imgList.value = [
+			...imgList.value,
+			{
+				id: imgID,
+				name: file.name,
+				type: imgType,
+				modifiedAt: file.lastModified,
+				dataURL: fileDataURL
+			}
+		]
+	}
+	loading.value = false
+}
+
+const fileToDataURL = (file: File): Promise<string> =>
+	new Promise((resolve, reject) => {
+		const fileReader = new FileReader()
+		fileReader.readAsDataURL(file)
+		fileReader.onloadend = () => {
+			const fileDataURL = String(fileReader.result)
+			resolve(fileDataURL)
+		}
+		fileReader.onerror = (e) => {
+			reject(e)
+		}
+	})
+
+const uploadImgs = () => {
+	console.log(imgList.value.length)
 }
 </script>
 

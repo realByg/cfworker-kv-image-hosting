@@ -1,7 +1,7 @@
 import { Middleware } from '@cfworker/web'
 
 // https://developers.cloudflare.com/workers/examples/basic-auth
-const verifyBasicAuth = (auth: string) => {
+export const verifyBasicAuth = (auth: string) => {
 	const [scheme, encoded] = auth.split(' ')
 
 	if (!encoded || scheme !== 'Basic') {
@@ -32,13 +32,20 @@ const basicAuth: Middleware = async ({ req, res }, next) => {
 	}
 
 	const auth = req.headers.get('Authorization')
-	if (auth && verifyBasicAuth(auth)) {
-		await next()
+	if (!auth) {
+		res.status = 401
+		res.body = '请登录'
 		return
 	}
 
-	res.status = 401
-	res.headers.set('WWW-Authenticate', 'Basic charset="UTF-8"')
+	if (!verifyBasicAuth(auth)) {
+		res.status = 401
+		res.body = '用户名或密码错误'
+		return
+	}
+
+	await next()
+	// res.headers.set('WWW-Authenticate', 'Basic charset="UTF-8"')
 }
 
 export default basicAuth

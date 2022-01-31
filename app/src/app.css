@@ -3,9 +3,5 @@
 @tailwind utilities;
 
 body {
-	@apply scroll-smooth text-base bg-slate-300 select-none;
-}
-
-svg {
-	@apply cursor-pointer;
+	@apply scroll-smooth text-base bg-slate-300 select-none overflow-x-hidden;
 }
