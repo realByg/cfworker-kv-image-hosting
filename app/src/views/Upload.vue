@@ -8,60 +8,76 @@
 		<div class="border-2 border-dashed border-slate-400 rounded-md relative">
 			<loading-overlay :loading="loading" />
 
-			<div class="grid p-4 gap-4 grid-cols-3" @drop.prevent="onFileDrop" @dragover.prevent>
-				<div v-if="imgList.length === 0" class="col-span-3">
-					<div class="h-[240px] w-full flex items-center justify-center">
-						<div class="text-gray-500">
-							<font-awesome-icon :icon="faCopy"></font-awesome-icon>
-							粘贴或拖动图片至此处
-						</div>
+			<div
+				class="grid p-4 gap-4 grid-cols-3 min-h-[240px]"
+				@drop.prevent="onFileDrop"
+				@dragover.prevent
+			>
+				<div
+					v-if="imgList.length === 0"
+					class="absolute -z-10 left-0 top-0 w-full h-full flex items-center justify-center"
+				>
+					<div class="text-gray-500">
+						<font-awesome-icon :icon="faCopy"></font-awesome-icon>
+						粘贴或拖动图片至此处
 					</div>
 				</div>
 
-				<div class="col-span-3 md:col-span-1" v-for="img in imgList" :key="img.id">
-					<div class="w-full bg-slate-200 rounded-md shadow-sm overflow-hidden relative">
-						<img
-							class="block w-full h-60 object-cover cursor-zoom-in"
-							:src="img.dataURL"
-							@click="viewImg(img.id)"
-						/>
+				<transition-group name="el-fade-in-linear">
+					<div class="col-span-3 md:col-span-1" v-for="img in imgList" :key="img.id">
 						<div
-							class="w-full p-2 absolute left-0 bottom-0 bg-slate-800/50 backdrop-blur-sm"
+							class="w-full bg-slate-200 rounded-md shadow-sm overflow-hidden relative"
 						>
-							<div class="w-full flex items-center">
-								<div class="flex-1 w-full truncate text-white">
-									<el-tooltip :content="img.name" placement="top-start">
-										{{ img.name }}
-									</el-tooltip>
+							<img
+								class="block w-full h-60 object-cover cursor-zoom-in"
+								:src="img.dataURL"
+								@click="viewImg(img.id)"
+							/>
+							<div
+								class="w-full p-2 absolute left-0 bottom-0 bg-slate-800/50 backdrop-blur-sm"
+							>
+								<div class="w-full flex items-center">
+									<div class="flex-1 w-full truncate text-white">
+										<el-tooltip :content="img.name" placement="top-start">
+											{{ img.name }}
+										</el-tooltip>
+									</div>
+									<font-awesome-icon
+										:icon="faTimesCircle"
+										class="text-red-500 cursor-pointer"
+										@click="removeImg(img.id)"
+									></font-awesome-icon>
 								</div>
-								<font-awesome-icon
-									:icon="faTimesCircle"
-									class="text-red-500 cursor-pointer"
-									@click="removeImg(img.id)"
-								></font-awesome-icon>
-							</div>
-							<div class="text-xs text-gray-300">
-								{{ formatBytes(img.dataURL.length) }}
+								<div class="text-xs text-gray-300">
+									{{ formatBytes(img.dataURL.length) }}
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
+				</transition-group>
 			</div>
 		</div>
 
-		<div v-if="imgList.length" class="w-full mt-4 flex items-center text-sm text-gray-500">
-			<el-checkbox class="h-6" v-model="imgsHasExpiration" size="large" label="过期删除" />
-			<el-date-picker
-				v-if="imgsHasExpiration"
-				v-model="imgsExpireAt"
-				popper-class="remove-now-btn"
-				size="small"
-				class="ml-2"
-				type="datetime"
-				placeholder="选择过期时间"
-				:disabled-date="(date: Date) => date < new Date()"
-			/>
-		</div>
+		<transition name="el-zoom-in-top">
+			<div v-if="imgList.length" class="w-full mt-4 flex items-center text-sm text-gray-500">
+				<el-checkbox
+					class="h-6"
+					v-model="imgsHasExpiration"
+					size="large"
+					label="过期删除"
+				/>
+				<el-date-picker
+					v-if="imgsHasExpiration"
+					v-model="imgsExpireAt"
+					popper-class="remove-now-btn"
+					size="small"
+					class="ml-2"
+					type="datetime"
+					placeholder="选择过期时间"
+					:disabled-date="(date: Date) => date < new Date()"
+				/>
+			</div>
+		</transition>
 
 		<div class="w-full rounded-md shadow-sm overflow-hidden mt-4 grid grid-cols-8">
 			<div class="md:col-span-1 col-span-8" @click="input?.click()">
