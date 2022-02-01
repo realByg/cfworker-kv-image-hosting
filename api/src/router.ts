@@ -1,6 +1,7 @@
 import { Router, validate } from '@cfworker/web'
-import uploadImgs from './routes/upload-imgs'
-import getImgByID from './routes/get-img-by-id'
+import uploadImages from './routes/upload-images'
+import getImageByID from './routes/get-image-by-id'
+import listImages from './routes/list-images'
 
 const router = new Router()
 
@@ -10,20 +11,18 @@ router.get('/', ({ res }) => {
 })
 
 router.get(
-	'/img/:imgID',
+	'/img/:imageID',
 	validate({
 		params: {
-			required: ['imgID']
-		},
+			required: ['imageID']
+		}
 	}),
-	getImgByID
+	getImageByID
 )
 
-router.get('/api/imgs', ({ res }) => {
-	res.status = 200
-})
+router.get('/api/imgs', listImages)
 
-router.post('/api/imgs', uploadImgs)
+router.post('/api/imgs', uploadImages)
 
 router.delete('/api/imgs', ({ req, res }) => {
 	res.status = 200

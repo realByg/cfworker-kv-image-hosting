@@ -1,6 +1,5 @@
 import { Middleware } from '@cfworker/web'
 
-// https://developers.cloudflare.com/workers/examples/basic-auth
 const verifyBasicAuth = (auth: string) => {
 	const [scheme, encoded] = auth.split(' ')
 

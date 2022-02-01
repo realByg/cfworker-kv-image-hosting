@@ -5,11 +5,11 @@ const router = createRouter({
 	routes: [
 		{
 			path: '/',
-			component: () => import('../views/ManageImgs.vue')
+			component: () => import('../views/ManageImages.vue')
 		},
 		{
 			path: '/up',
-			component: () => import('../views/UploadImgs.vue')
+			component: () => import('../views/UploadImages.vue')
 		},
 		{
 			path: '/:path(.*)',

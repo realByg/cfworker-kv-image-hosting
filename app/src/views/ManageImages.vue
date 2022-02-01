@@ -7,9 +7,9 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { requestGetImgs } from '../utils/request'
+import { requestListImages } from '../utils/request'
 
 onMounted(() => {
-	requestGetImgs()
+	requestListImages()
 })
 </script>

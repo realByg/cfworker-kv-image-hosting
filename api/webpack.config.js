@@ -4,20 +4,20 @@ module.exports = {
 	mode: 'production',
 	entry: './src/index.ts',
 	node: {
-		// fs: 'empty',
+		// fs: 'empty'
 		// tls: 'empty',
 		// net: 'empty',
 		// os: true,
 	},
 	output: {
 		filename: 'worker.js',
-		path: path.join(__dirname, 'dist'),
+		path: path.join(__dirname, 'dist')
 	},
 	performance: {
-		hints: false,
+		hints: false
 	},
 	resolve: {
-		extensions: ['.ts', '.js', '.json'],
+		extensions: ['.ts', '.js', '.json']
 	},
 	module: {
 		rules: [
@@ -30,9 +30,9 @@ module.exports = {
 					plugins: [
 						'@babel/plugin-transform-runtime',
 						'@babel/plugin-proposal-optional-chaining',
-						'@babel/plugin-proposal-nullish-coalescing-operator',
-					],
-				},
+						'@babel/plugin-proposal-nullish-coalescing-operator'
+					]
+				}
 			},
 			{
 				test: /\.(ts|js)$/,
@@ -44,10 +44,10 @@ module.exports = {
 						'@babel/plugin-proposal-class-properties',
 						'@babel/plugin-transform-runtime',
 						'@babel/plugin-proposal-optional-chaining',
-						'@babel/plugin-proposal-nullish-coalescing-operator',
-					],
-				},
-			},
-		],
-	},
+						'@babel/plugin-proposal-nullish-coalescing-operator'
+					]
+				}
+			}
+		]
+	}
 }

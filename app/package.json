@@ -13,8 +13,9 @@
 		"@fortawesome/free-solid-svg-icons": "^5.15.4",
 		"@fortawesome/vue-fontawesome": "^3.0.0-5",
 		"axios": "^0.25.0",
+		"blob-util": "^2.0.2",
+		"crypto-js": "^4.1.1",
 		"element-plus": "^1.3.0-beta.9",
-		"nanoid": "^3.2.0",
 		"v-viewer": "^3.0.10",
 		"vue": "^3.2.25",
 		"vue-router": "^4.0.12"

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { ElNotification as elNotify } from 'element-plus'
-import type { ConvertedImg } from './types'
+import type { ConvertedImage } from './types'
 
 const request = axios.create({
 	baseURL: import.meta.env.VITE_APP_API_URL,
@@ -11,8 +11,7 @@ request.interceptors.response.use(
 	(response) => response.data,
 	(error) => {
 		elNotify({
-			title: error.response.status,
-			message: error.message || error.response.data,
+			message: error?.response?.data || String(error),
 			duration: 0,
 			type: 'error'
 		})
@@ -20,6 +19,6 @@ request.interceptors.response.use(
 	}
 )
 
-export const requestGetImgs = () => request.get('/api/imgs')
-export const requestUploadImgs = (data: ConvertedImg[]) => request.post('/api/imgs', data)
-export const requestDeleteImgs = (data: string[]) => request.delete('/api/imgs', { data })
+export const requestListImages = (): Promise<ConvertedImage[]> => request.get('/api/imgs')
+export const requestUploadImages = (data: ConvertedImage[]) => request.post('/api/imgs', data)
+export const requestDeleteImages = (data: string[]) => request.delete('/api/imgs', { data })

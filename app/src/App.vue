@@ -13,9 +13,10 @@
 						<div class="flex-1"></div>
 
 						<div
-							:class="`${
-								$route.path === '/up' ? 'bg-slate-300' : ''
-							} px-3 py-2 rounded-md  mr-2 text-gray-800 text-sm cursor-pointer`"
+							:class="{
+								'bg-slate-300': $route.path === '/up'
+							}"
+							class="px-3 py-2 rounded-md mr-2 text-gray-800 text-sm cursor-pointer"
 							@click="router.push('/up')"
 						>
 							<font-awesome-icon :icon="faUpload"></font-awesome-icon>
@@ -23,9 +24,10 @@
 						</div>
 
 						<div
-							:class="`${
-								$route.path === '/' ? 'bg-slate-300' : ''
-							} px-3 py-2 rounded-md  mr-2 text-gray-800 text-sm cursor-pointer`"
+							:class="{
+								'bg-slate-300': $route.path === '/'
+							}"
+							class="px-3 py-2 rounded-md mr-2 text-gray-800 text-sm cursor-pointer"
 							@click="router.push('/')"
 						>
 							<font-awesome-icon :icon="faCog"></font-awesome-icon>
