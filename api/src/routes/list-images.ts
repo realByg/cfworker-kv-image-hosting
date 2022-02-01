@@ -12,7 +12,8 @@ const listImages: Middleware = async ({ req, res }) => {
 			dataURL: '',
 			src: `${ENV === 'dev' ? 'http://127.0.0.1:8787' : req.url.origin}/img/${item.name}`,
 			uploadedAt: item.metadata['uploadedAt'],
-			expiresAt: item.expiration * 1000
+			expiresAt: item.expiration * 1000,
+			size: item.metadata['size']
 		})
 	}
 

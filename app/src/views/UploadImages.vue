@@ -34,6 +34,7 @@
 							:size="item.dataURL.length"
 							:name="item.name"
 							@delete="removeImage(item.id, item.src)"
+							mode="upload"
 						/>
 					</div>
 				</transition-group>
@@ -212,7 +213,9 @@ const appendConvertedImages = async (files: FileList | null | undefined) => {
 				id,
 				name: file.name,
 				dataURL,
-				src: URL.createObjectURL(file)
+				src: URL.createObjectURL(file),
+				size: dataURL.length,
+				uploadedAt: 0
 			}
 		]
 	}

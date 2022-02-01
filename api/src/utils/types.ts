@@ -3,6 +3,7 @@ export type ConvertedImage = {
 	name: string
 	dataURL: string
 	src: string
-	uploadedAt?: number
+	size: number
+	uploadedAt: number
 	expiresAt?: number
 }

@@ -11,7 +11,8 @@ const uploadImages: Middleware = async ({ req, res }) => {
 				: undefined,
 			metadata: {
 				name: item.name,
-				uploadedAt: new Date().getTime()
+				uploadedAt: new Date().getTime(),
+				size: item.size
 			}
 		})
 	}
