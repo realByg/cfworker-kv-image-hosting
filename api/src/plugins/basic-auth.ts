@@ -26,26 +26,29 @@ const verifyBasicAuth = (auth: string) => {
 }
 
 const basicAuth: Middleware = async ({ req, res }, next) => {
+	if (/^\/img\/.+$/.test(req.url.pathname) && req.method === 'GET') {
+		await next()
+		return
+	}
+
+	if (ENV === 'dev') {
+		await next()
+		return
+	}
+
 	if (req.url.protocol !== 'https:') {
 		res.status = 400
 		return
 	}
 
 	const auth = req.headers.get('Authorization')
-	if (!auth) {
+	if (!auth || !verifyBasicAuth(auth)) {
 		res.status = 401
-		res.body = '请登录'
-		return
-	}
-
-	if (!verifyBasicAuth(auth)) {
-		res.status = 401
-		res.body = '用户名或密码错误'
+		res.headers.set('WWW-Authenticate', 'Basic charset="UTF-8"')
 		return
 	}
 
 	await next()
-	// res.headers.set('WWW-Authenticate', 'Basic charset="UTF-8"')
 }
 
 export default basicAuth

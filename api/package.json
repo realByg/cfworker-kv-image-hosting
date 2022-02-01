@@ -3,10 +3,10 @@
 	"version": "0.0.1",
 	"main": "./src/index.ts",
 	"scripts": {
-		"dev": "wrangler dev",
-		"preview": "wrangler preview --watch",
-		"build": "wrangler build",
-		"publish": "wrangler publish"
+		"dev": "wrangler dev --env dev",
+		"preview": "wrangler preview --watch --env dev",
+		"build": "wrangler build --env prod",
+		"publish": "wrangler publish --env prod"
 	},
 	"author": "Byg",
 	"license": "MIT",

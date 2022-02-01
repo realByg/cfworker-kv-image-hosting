@@ -1,11 +1,12 @@
 import { Router, validate } from '@cfworker/web'
-import basicAuth from './plugins/basic-auth'
-import cors from './plugins/cors'
+import uploadImgs from './routes/upload-imgs'
+import getImgByID from './routes/get-img-by-id'
 
 const router = new Router()
 
 router.get('/', ({ res }) => {
 	res.status = 200
+	res.body = ENV
 })
 
 router.get(
@@ -13,23 +14,20 @@ router.get(
 	validate({
 		params: {
 			required: ['imgID']
-		}
+		},
 	}),
-	cors,
-	({ req, res }) => {
-		res.status = 200
-	}
+	getImgByID
 )
 
-router.get('/api/login', basicAuth, ({ res }) => {
+router.get('/api/imgs', ({ res }) => {
 	res.status = 200
 })
 
-router.get('/api/imgs', basicAuth, ({ res }) => {})
+router.post('/api/imgs', uploadImgs)
 
-router.post('/api/imgs', basicAuth, ({ req, res }) => {})
-
-router.delete('/api/imgs', basicAuth, ({ req, res }) => {})
+router.delete('/api/imgs', ({ req, res }) => {
+	res.status = 200
+})
 
 // cors options
 router.all('/(.*)', ({ res }) => {

@@ -34,17 +34,17 @@
 								@click="viewImg(img.id)"
 							/>
 							<div
-								class="w-full p-2 absolute left-0 bottom-0 bg-slate-800/50 backdrop-blur-sm"
+								class="w-full p-2 absolute left-0 bottom-0 bg-slate-800/70 backdrop-blur-sm"
 							>
-								<div class="w-full flex items-center">
-									<div class="flex-1 w-full truncate text-white">
+								<div class="w-full flex items-center text-white">
+									<div class="flex-1 w-full truncate">
 										<el-tooltip :content="img.name" placement="top-start">
 											{{ img.name }}
 										</el-tooltip>
 									</div>
 									<font-awesome-icon
 										:icon="faTimesCircle"
-										class="text-red-500 cursor-pointer"
+										class="cursor-pointer"
 										@click="removeImg(img.id)"
 									></font-awesome-icon>
 								</div>
@@ -62,12 +62,16 @@
 			<div v-if="imgList.length" class="w-full mt-4 flex items-center text-sm text-gray-500">
 				<el-checkbox
 					class="h-6"
+					:class="{
+						'area-disabled': loading
+					}"
 					v-model="imgsHasExpiration"
 					size="large"
 					label="过期删除"
 				/>
 				<el-date-picker
 					v-if="imgsHasExpiration"
+					:disabled="loading"
 					v-model="imgsExpireAt"
 					popper-class="remove-now-btn"
 					size="small"
@@ -80,9 +84,13 @@
 		</transition>
 
 		<div class="w-full rounded-md shadow-sm overflow-hidden mt-4 grid grid-cols-8">
-			<div class="md:col-span-1 col-span-8" @click="input?.click()">
+			<div class="md:col-span-1 col-span-8">
 				<div
 					class="w-full h-10 bg-blue-500 cursor-pointer flex items-center justify-center text-white"
+					:class="{
+						'area-disabled': loading
+					}"
+					@click="input?.click()"
 				>
 					<font-awesome-icon :icon="faImages" class="mr-2"></font-awesome-icon>
 					选择图片
@@ -99,11 +107,10 @@
 
 			<div class="md:col-span-1 col-span-3">
 				<div
-					:class="`${
-						imgList.length
-							? 'cursor-pointer bg-red-500'
-							: 'cursor-not-allowed bg-red-300 active:pointer-events-none'
-					} w-full h-10 flex items-center justify-center text-white`"
+					class="w-full bg-red-500 cursor-pointer h-10 flex items-center justify-center text-white"
+					:class="{
+						'area-disabled': imgList.length === 0 || loading
+					}"
 					@click="imgList = []"
 				>
 					<font-awesome-icon :icon="faTrashAlt" class="mr-2"></font-awesome-icon>
@@ -113,11 +120,10 @@
 
 			<div class="md:col-span-1 col-span-5">
 				<div
-					:class="`${
-						imgList.length
-							? 'bg-green-500 cursor-pointer'
-							: 'bg-green-300 cursor-not-allowed active:pointer-events-none'
-					} w-full h-10 flex items-center justify-center text-white`"
+					class="w-full h-10 flex items-center justify-center text-white bg-green-500 cursor-pointer"
+					:class="{
+						'area-disabled': imgList.length === 0 || loading
+					}"
 					@click="uploadImgs"
 				>
 					<font-awesome-icon :icon="faUpload" class="mr-2"></font-awesome-icon>
@@ -142,11 +148,13 @@ import { faImages, faTrashAlt, faCopy, faTimesCircle } from '@fortawesome/free-r
 import { faUpload } from '@fortawesome/free-solid-svg-icons'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { ConvertedImg } from '../utils/types'
-import { MD5 } from 'crypto-js'
+import { nanoid } from 'nanoid'
 import LoadingOverlay from '../components/LoadingOverlay.vue'
 import { formatBytes } from '../utils/format-bytes'
-import { ElNotification, ElTooltip, ElCheckbox, ElDatePicker } from 'element-plus'
+import { ElNotification as elNotify, ElTooltip, ElCheckbox, ElDatePicker } from 'element-plus'
 import { api as imgViewer } from 'v-viewer'
+import { requestUploadImgs } from '../utils/request'
+import { useRouter } from 'vue-router'
 
 const imgSizeLimit = 20 * 1024 * 1024
 const input = ref<HTMLInputElement>()
@@ -154,7 +162,8 @@ const imgList = ref<ConvertedImg[]>([])
 const loading = ref(false)
 const imgTotalSize = computed(() => imgList.value.reduce((a, i) => a + i.dataURL.length, 0))
 const imgsHasExpiration = ref(false)
-const imgsExpireAt = ref('')
+const imgsExpireAt = ref(new Date(new Date().setHours(new Date().getHours() + 24)))
+const router = useRouter()
 
 watch(
 	() => imgsExpireAt.value,
@@ -184,6 +193,58 @@ onUnmounted(() => {
 	document.onpaste = null
 })
 
+const addToImgList = async (files: FileList | null | undefined) => {
+	if (!files) return
+
+	loading.value = true
+	for (let i = 0; i < files.length; i++) {
+		const file = files.item(i)
+		if (!file) return
+		if (file.size > imgSizeLimit) {
+			elNotify({
+				message: `${file.name} 文件过大`,
+				type: 'error'
+			})
+			continue
+		}
+
+		const fileDataURL = await blobToDataURL(file)
+		if (!fileDataURL.startsWith('data:image/')) {
+			elNotify({
+				message: `${file.name} 不是图片文件`,
+				type: 'error'
+			})
+			continue
+		}
+
+		const imgExists = imgList.value.some((img) => img.dataURL === fileDataURL)
+		if (imgExists) continue
+
+		imgList.value = [
+			...imgList.value,
+			{
+				id: nanoid(8),
+				name: file.name,
+				dataURL: fileDataURL
+			}
+		]
+	}
+	loading.value = false
+}
+
+const blobToDataURL = (blob: Blob): Promise<string> =>
+	new Promise((resolve, reject) => {
+		const reader = new FileReader()
+		reader.readAsDataURL(blob)
+		reader.onloadend = () => {
+			resolve(String(reader.result))
+		}
+		reader.onerror = (e) => {
+			reject(String(e))
+		}
+	})
+
+
 const viewImg = (imgID: string) => {
 	imgViewer({
 		images: imgList.value.map((img) => img.dataURL),
@@ -197,64 +258,22 @@ const removeImg = (imgID: string) => {
 	imgList.value = imgList.value.filter((img) => img.id !== imgID)
 }
 
-const addToImgList = async (files: FileList | null | undefined) => {
-	if (!files) return
-
-	loading.value = true
-	for (let i = 0; i < files.length; i++) {
-		const file = files.item(i)
-		if (!file) return
-		if (file.size > imgSizeLimit) {
-			ElNotification({
-				message: `${file.name} 文件过大`,
-				type: 'error'
-			})
-			continue
-		}
-
-		const fileDataURL = await fileToDataURL(file)
-		if (!fileDataURL.startsWith('data:image/')) {
-			ElNotification({
-				message: `${file.name} 不是图片文件`,
-				type: 'error'
-			})
-			continue
-		}
-
-		const imgID = MD5(fileDataURL).toString()
-		const imgType = fileDataURL.match(/data:(image\/.*);base64/)?.[1] || 'image/jpeg'
-		const imgExists = imgList.value.some((img) => img.id === imgID)
-		if (imgExists) continue
-
-		imgList.value = [
-			...imgList.value,
-			{
-				id: imgID,
-				name: file.name,
-				type: imgType,
-				modifiedAt: file.lastModified,
-				dataURL: fileDataURL
-			}
-		]
-	}
-	loading.value = false
-}
-
-const fileToDataURL = (file: File): Promise<string> =>
-	new Promise((resolve, reject) => {
-		const fileReader = new FileReader()
-		fileReader.readAsDataURL(file)
-		fileReader.onloadend = () => {
-			const fileDataURL = String(fileReader.result)
-			resolve(fileDataURL)
-		}
-		fileReader.onerror = (e) => {
-			reject(e)
-		}
-	})
-
 const uploadImgs = () => {
-	console.log(imgList.value.length)
+	loading.value = true
+	requestUploadImgs(imgList.value)
+		.then(() => {
+			elNotify({
+				title: '上传完成',
+				message: `共 ${imgList.value.length} 张图片，${formatBytes(imgTotalSize.value)}`,
+				type: 'success'
+			})
+			imgList.value = []
+			router.push('/')
+		})
+		.catch(() => {})
+		.finally(() => {
+			loading.value = false
+		})
 }
 </script>
 

@@ -1,7 +1,7 @@
 <template>
 	<div
 		v-if="props.loading"
-		class="backdrop-blur-sm left-0 top-0 h-full w-full absolute flex items-center justify-around z-50"
+		class="backdrop-blur-sm left-0 top-0 h-full w-full absolute flex items-center justify-around z-50 cursor-not-allowed"
 	>
 		<font-awesome-icon
 			:icon="faSpinner"

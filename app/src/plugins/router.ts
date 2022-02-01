@@ -1,36 +1,21 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import store from '../plugins/store'
-import { getBasicToken } from '../utils/local-storage'
-import { ElNotification } from 'element-plus'
 
 const router = createRouter({
 	history: createWebHashHistory(),
 	routes: [
 		{
-			path: '/manage',
-			component: () => import('../views/Manage.vue')
+			path: '/',
+			component: () => import('../views/ManageImgs.vue')
 		},
 		{
-			path: '/upload',
-			component: () => import('../views/Upload.vue')
+			path: '/up',
+			component: () => import('../views/UploadImgs.vue')
 		},
 		{
 			path: '/:path(.*)',
-			redirect: '/manage'
+			redirect: '/'
 		}
 	]
-})
-
-router.beforeEach(() => {
-	const basicToken = getBasicToken()
-
-	if (!basicToken) {
-		ElNotification({
-			message: '请登录',
-			type: 'warning'
-		})
-		store.commit('setLoginAreaVisible', true)
-	}
 })
 
 export default router

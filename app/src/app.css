@@ -5,3 +5,7 @@
 body {
 	@apply scroll-smooth text-base bg-slate-300 select-none overflow-x-hidden;
 }
+
+.area-disabled {
+	@apply !opacity-60 active:!pointer-events-none !cursor-not-allowed;
+}
