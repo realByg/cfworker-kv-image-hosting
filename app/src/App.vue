@@ -19,7 +19,7 @@
 							class="px-3 py-2 rounded-md mr-2 text-gray-800 text-sm cursor-pointer"
 							@click="router.push('/up')"
 						>
-							<font-awesome-icon :icon="faUpload"></font-awesome-icon>
+							<font-awesome-icon :icon="faUpload" />
 							<span class="hidden md:inline-block ml-2">上传</span>
 						</div>
 
@@ -30,7 +30,7 @@
 							class="px-3 py-2 rounded-md text-gray-800 text-sm cursor-pointer"
 							@click="router.push('/')"
 						>
-							<font-awesome-icon :icon="faCog"></font-awesome-icon>
+							<font-awesome-icon :icon="faCog" />
 							<span class="hidden md:inline-block ml-2">管理</span>
 						</div>
 					</div>

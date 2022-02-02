@@ -13,26 +13,58 @@
 							{{ props.name }}
 						</el-tooltip>
 					</div>
-					<font-awesome-icon
+					<div
 						v-if="props.mode === 'converted'"
-						:icon="faTimesCircle"
-						class="cursor-pointer"
+						class="w-6 h-6 flex items-center justify-center cursor-pointer"
 						@click="emit('delete')"
-					></font-awesome-icon>
+					>
+						<font-awesome-icon :icon="faTimesCircle" />
+					</div>
 				</div>
-				<div class="text-xs text-gray-300">
+				<span class="text-xs text-gray-300 flex items-center">
 					{{ formatBytes(props.size) }}
+					<el-divider v-if="props.uploadedAt" direction="vertical" />
 					<span v-if="props.uploadedAt">
-						, {{ new Date(props.uploadedAt).toLocaleDateString() }}
+						{{ new Date(props.uploadedAt).toLocaleDateString() }}
 					</span>
-				</div>
+					<el-divider v-if="props.expiresAt" direction="vertical" />
+					<span v-if="props.expiresAt">
+						<font-awesome-icon :icon="faTrashAlt" />
+						{{ new Date(props.expiresAt).toLocaleString() }}
+					</span>
+				</span>
 			</div>
 			<div v-if="props.mode === 'uploaded'">
 				<el-divider class="m-0" />
-				<div class="p-2 text-sm text-white">
-					<div v-if="props.expiresAt">
-						过期时间：{{ new Date(props.expiresAt).toLocaleString() }}
+				<div class="w-full flex text-white h-10 text-center text-sm">
+					<div class="flex-1 flex items-center justify-center cursor-pointer">
+						<font-awesome-icon :icon="faDownload" class="mr-2" />
+						下载
 					</div>
+					<el-divider direction="vertical" class="h-full" />
+					<div class="flex-1 flex items-center justify-center cursor-pointer">
+						<font-awesome-icon :icon="faCopy" class="mr-2" />
+						链接
+					</div>
+					<el-divider direction="vertical" class="h-full" />
+					<el-popconfirm
+						title="确认删除图片吗？"
+						confirm-button-type="danger"
+						@confirm="
+							() => {
+								// (e: Event) => boolean ???
+								emit('delete')
+								return true
+							}
+						"
+					>
+						<template #reference>
+							<div class="flex-1 flex items-center justify-center cursor-pointer">
+								<font-awesome-icon :icon="faTrashAlt" class="mr-2" />
+								删除
+							</div>
+						</template>
+					</el-popconfirm>
 				</div>
 			</div>
 		</div>
@@ -40,10 +72,11 @@
 </template>
 
 <script setup lang="ts">
-import { faTimesCircle } from '@fortawesome/free-regular-svg-icons'
+import { faTimesCircle, faTrashAlt, faCopy } from '@fortawesome/free-regular-svg-icons'
+import { faDownload } from '@fortawesome/free-solid-svg-icons'
 import formatBytes from '../utils/format-bytes'
 import { api as imageViewer } from 'v-viewer'
-import { ElTooltip, ElDivider } from 'element-plus'
+import { ElTooltip, ElDivider, ElPopconfirm } from 'element-plus'
 
 const props = defineProps<{
 	src: string

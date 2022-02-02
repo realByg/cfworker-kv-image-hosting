@@ -18,7 +18,7 @@
 					class="absolute -z-10 left-0 top-0 w-full h-full flex items-center justify-center"
 				>
 					<div class="text-gray-500">
-						<font-awesome-icon :icon="faCopy"></font-awesome-icon>
+						<font-awesome-icon :icon="faCopy" />
 						粘贴或拖动图片至此处
 					</div>
 				</div>
@@ -78,15 +78,13 @@
 					}"
 					@click="input?.click()"
 				>
-					<font-awesome-icon :icon="faImages" class="mr-2"></font-awesome-icon>
+					<font-awesome-icon :icon="faImages" class="mr-2" />
 					选择图片
 				</div>
 			</div>
 
 			<div class="md:col-span-5 col-span-8">
-				<div
-					class="w-full h-10 bg-slate-200 flex items-center md:pl-4 justify-center md:justify-start"
-				>
+				<div class="w-full h-10 bg-slate-200 leading-10 px-4 text-center md:text-left">
 					已选择 {{ convertedImages.length }} 张，共 {{ formatBytes(imagesTotalSize) }}
 				</div>
 			</div>
@@ -99,7 +97,7 @@
 					}"
 					@click="convertedImages = []"
 				>
-					<font-awesome-icon :icon="faTrashAlt" class="mr-2"></font-awesome-icon>
+					<font-awesome-icon :icon="faTrashAlt" class="mr-2" />
 					清除
 				</div>
 			</div>
@@ -112,7 +110,7 @@
 					}"
 					@click="uploadImages"
 				>
-					<font-awesome-icon :icon="faUpload" class="mr-2"></font-awesome-icon>
+					<font-awesome-icon :icon="faUpload" class="mr-2" />
 					上传
 				</div>
 			</div>

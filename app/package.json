@@ -1,6 +1,6 @@
 {
 	"name": "cfworker-kv-image-hosting",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"scripts": {
 		"dev": "vite",
 		"build": "vue-tsc --noEmit && vite build",
@@ -15,9 +15,9 @@
 		"axios": "^0.25.0",
 		"blob-util": "^2.0.2",
 		"crypto-js": "^4.1.1",
-		"element-plus": "^1.3.0-beta.9",
+		"element-plus": "^1.3.0-beta.10",
 		"v-viewer": "^3.0.10",
-		"vue": "^3.2.25",
+		"vue": "^3.2.29",
 		"vue-router": "^4.0.12"
 	},
 	"devDependencies": {

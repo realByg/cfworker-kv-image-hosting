@@ -21,4 +21,4 @@ request.interceptors.response.use(
 
 export const requestListImages = (): Promise<UploadedImage[]> => request.get('/api/imgs')
 export const requestUploadImages = (data: ConvertedImage[]) => request.post('/api/imgs', data)
-export const requestDeleteImages = (data: string[]) => request.delete('/api/imgs', { data })
+export const requestDeleteImage = (data: string) => request.delete('/api/img', { data })

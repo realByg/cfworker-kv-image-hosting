@@ -13,7 +13,7 @@
 				:icon="faRedoAlt"
 				class="text-xl cursor-pointer"
 				@click="listImages"
-			></font-awesome-icon>
+			/>
 		</div>
 
 		<div class="grid gap-4 grid-cols-3">
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { requestListImages } from '../utils/request'
+import { requestListImages, requestDeleteImage } from '../utils/request'
 import LoadingOverlay from '../components/LoadingOverlay.vue'
 import formatBytes from '../utils/format-bytes'
 import { computed, onMounted, ref } from 'vue'
@@ -67,5 +67,15 @@ onMounted(() => {
 	listImages()
 })
 
-const deleteImage = (id: string) => {}
+const deleteImage = (id: string) => {
+	loading.value = true
+
+	requestDeleteImage(id)
+		.then(() => {
+			uploadedImages.value = uploadedImages.value.filter((item) => item.id !== id)
+		})
+		.finally(() => {
+			loading.value = false
+		})
+}
 </script>
