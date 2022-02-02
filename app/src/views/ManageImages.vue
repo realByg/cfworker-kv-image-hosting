@@ -18,12 +18,16 @@
 
 		<div class="grid gap-4 grid-cols-3">
 			<transition-group name="el-fade-in-linear">
-				<div class="col-span-3 md:col-span-1" v-for="item in uploadedImages" :key="item.id">
+				<div
+					class="col-span-3 md:col-span-1"
+					v-for="item in uploadedImages"
+					:key="item.src"
+				>
 					<image-box
 						:src="item.src"
 						:size="item.size"
 						:name="item.name"
-						@delete="deleteImage(item.id)"
+						@delete="deleteImage(item.src)"
 						mode="uploaded"
 						:uploaded-at="item.uploadedAt"
 						:expires-at="item.expiresAt"
@@ -67,12 +71,13 @@ onMounted(() => {
 	listImages()
 })
 
-const deleteImage = (id: string) => {
+const deleteImage = (src: string) => {
 	loading.value = true
 
-	requestDeleteImage(id)
+	const imageID = src.split('/').slice(-1)[0]
+	requestDeleteImage(imageID)
 		.then(() => {
-			uploadedImages.value = uploadedImages.value.filter((item) => item.id !== id)
+			uploadedImages.value = uploadedImages.value.filter((item) => item.src !== src)
 		})
 		.finally(() => {
 			loading.value = false

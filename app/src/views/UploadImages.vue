@@ -27,13 +27,13 @@
 					<div
 						class="col-span-3 md:col-span-1"
 						v-for="item in convertedImages"
-						:key="item.id"
+						:key="item.tmpSrc"
 					>
 						<image-box
 							:src="item.tmpSrc"
-							:size="item.dataURL.length"
-							:name="item.name"
-							@delete="removeImage(item.id, item.tmpSrc)"
+							:size="item.file.size"
+							:name="item.file.name"
+							@delete="removeImage(item.tmpSrc)"
 							mode="converted"
 						/>
 					</div>
@@ -130,20 +130,18 @@
 <script setup lang="ts">
 import { faImages, faTrashAlt, faCopy } from '@fortawesome/free-regular-svg-icons'
 import { faUpload } from '@fortawesome/free-solid-svg-icons'
-import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import LoadingOverlay from '../components/LoadingOverlay.vue'
 import formatBytes from '../utils/format-bytes'
 import { ElNotification as elNotify, ElCheckbox, ElDatePicker } from 'element-plus'
 import { requestUploadImages } from '../utils/request'
 import { useRouter } from 'vue-router'
 import ImageBox from '../components/ImageBox.vue'
-import { blobToDataURL } from 'blob-util'
-import { MD5 } from 'crypto-js'
 import type { ConvertedImage } from '../utils/types'
 
 const convertedImages = ref<ConvertedImage[]>([])
 const imagesTotalSize = computed(() =>
-	convertedImages.value.reduce((total, item) => total + item.dataURL.length, 0)
+	convertedImages.value.reduce((total, item) => total + item.file.size, 0)
 )
 const imagesHaveExpiration = ref(false)
 const imagesExpiration = ref(new Date(new Date().setHours(new Date().getHours() + 24)))
@@ -151,15 +149,6 @@ const imageSizeLimit = 20 * 1024 * 1024
 const input = ref<HTMLInputElement>()
 const loading = ref(false)
 const router = useRouter()
-
-watchEffect(() => {
-	if (imagesHaveExpiration.value) {
-		convertedImages.value = convertedImages.value.map((item) => ({
-			...item,
-			expiresAt: imagesExpiration.value.getTime()
-		}))
-	}
-})
 
 const onInputChange = () => {
 	appendConvertedImages(input.value?.files)
@@ -203,31 +192,34 @@ const appendConvertedImages = async (files: FileList | null | undefined) => {
 			continue
 		}
 
-		const dataURL = await blobToDataURL(file)
-		const id = MD5(dataURL).toString().slice(0, 8)
 		convertedImages.value = [
 			...convertedImages.value,
 			{
-				id,
-				name: file.name,
-				dataURL,
-				tmpSrc: URL.createObjectURL(file),
-				expiresAt: 0
+				file,
+				tmpSrc: URL.createObjectURL(file)
 			}
 		]
 	}
 	loading.value = false
 }
 
-const removeImage = (id: string, src: string) => {
-	convertedImages.value = convertedImages.value.filter((item) => item.id !== id)
-	URL.revokeObjectURL(src)
+const removeImage = (tmpSrc: string) => {
+	convertedImages.value = convertedImages.value.filter((item) => item.tmpSrc !== tmpSrc)
+	URL.revokeObjectURL(tmpSrc)
 }
 
 const uploadImages = () => {
 	loading.value = true
 
-	requestUploadImages(convertedImages.value)
+	const formData = new FormData()
+	if (imagesHaveExpiration.value) {
+		formData.append('Expiration', String(imagesExpiration.value.getTime()))
+	}
+	for (let item of convertedImages.value) {
+		formData.append('Images', item.file)
+	}
+
+	requestUploadImages(formData)
 		.then(() => {
 			elNotify({
 				title: '上传完成',

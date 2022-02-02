@@ -1,16 +1,12 @@
-type BaseImage = {
-	id: string
-	name: string
-	expiresAt: number
-}
-
-export interface ConvertedImage extends BaseImage {
-	dataURL: string
+export type ConvertedImage = {
+	file: File
 	tmpSrc: string
 }
 
-export interface UploadedImage extends BaseImage {
+export type UploadedImage = {
 	src: string
 	size: number
+	name: string
 	uploadedAt: number
+	expiresAt: number
 }

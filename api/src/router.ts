@@ -1,18 +1,45 @@
 import { Router, validate } from '@cfworker/web'
-import uploadImages from './routes/upload-images'
-import getImageByID from './routes/get-image-by-id'
-import listImages from './routes/list-images'
-import deteleImageByID from './routes/delete-image-by-id'
+import type { UploadedImage } from './utils/types'
+import { ArrayBuffer as md5ArrayBuffer } from 'spark-md5'
 
 const router = new Router()
 
-router.get('/bruh', async ({ req, res }) => {
-	res.body = await __STATIC_CONTENT.get('favicon.f343726eb1.ico', 'stream')
+const __MANIFEST = JSON.parse(__STATIC_CONTENT_MANIFEST)
+
+router.get('/', async ({ res }) => {
+	res.headers.set('Content-Type', 'text/html')
+	res.body = await __STATIC_CONTENT.get(__MANIFEST['index.html'], {
+		cacheTtl: 3600
+	})
 })
 
-router.get('/', async ({ req, res }) => {
-	res.body = ENV
+router.get('/favicon.ico', async ({ res }) => {
+	res.headers.set('Content-Type', 'image/x-icon')
+	res.body = await __STATIC_CONTENT.get(__MANIFEST['favicon.ico'], {
+		type: 'stream',
+		cacheTtl: 3600
+	})
 })
+
+router.get(
+	'/assets/:fileName',
+	validate({
+		params: {
+			required: ['fileName']
+		}
+	}),
+	async ({ req, res }) => {
+		const fileName = req.params.fileName
+		if (fileName.endsWith('.js')) {
+			res.headers.set('Content-Type', 'application/javascript')
+		} else if (fileName.endsWith('.css')) {
+			res.headers.set('Content-Type', 'text/css')
+		}
+		res.body = await __STATIC_CONTENT.get(__MANIFEST[`assets/${fileName}`], {
+			cacheTtl: 3600
+		})
+	}
+)
 
 router.get(
 	'/img/:imageID',
@@ -21,22 +48,74 @@ router.get(
 			required: ['imageID']
 		}
 	}),
-	getImageByID
+	async ({ req, res }) => {
+		const imageID = req.params.imageID
+
+		const imageStream = await ImageKV.get(imageID, { cacheTtl: 3600, type: 'stream' })
+		if (!imageStream) {
+			res.status = 404
+			return
+		}
+
+		res.body = imageStream
+	}
 )
 
-router.get('/api/imgs', listImages)
+router.get('/api/imgs', async ({ req, res }) => {
+	const uploadedImages: UploadedImage[] = []
 
-router.post('/api/imgs', uploadImages)
+	const kvList = await ImageKV.list()
+	for (let item of kvList.keys) {
+		uploadedImages.push({
+			name: item.metadata['name'],
+			src: `${ENV === 'dev' ? 'http://127.0.0.1:8787' : req.url.origin}/img/${item.name}`,
+			uploadedAt: item.metadata['uploadedAt'] || 0,
+			expiresAt: item.expiration * 1000,
+			size: item.metadata['size'] || 0
+		})
+	}
 
-router.delete('/api/img', deteleImageByID)
+	res.body = uploadedImages
+})
+
+router.post('/api/imgs', async ({ req, res }) => {
+	const formData = await req.body.formData()
+
+	const expiration = Math.floor(Number(formData.get('Expiration')) / 1000) || undefined
+	const images = formData.getAll('Images')
+
+	for (let item of images) {
+		if (typeof item !== 'string') {
+			const imageID = md5ArrayBuffer.hash(await item.arrayBuffer()).slice(0, 8)
+
+			await ImageKV.put(imageID, item.stream(), {
+				expiration,
+				metadata: {
+					name: item.name,
+					uploadedAt: new Date().getTime(),
+					size: item.size
+				}
+			})
+		}
+	}
+
+	res.status = 200
+})
+
+router.delete('/api/img', async ({ req, res }) => {
+	const imageID = await req.body.text()
+	await ImageKV.delete(imageID)
+	res.status = 200
+})
 
 router.all('/(.*)', ({ res }) => {
+	// cors options
 	if (ENV === 'dev') {
-		// cors options
 		res.status = 200
-	} else {
-		res.redirect('/')
+		return
 	}
+
+	res.redirect('/')
 })
 
 export default router

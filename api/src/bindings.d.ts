@@ -6,4 +6,5 @@ declare global {
 	const USERNAME: string
 	const ImageKV: KVNamespace
 	const __STATIC_CONTENT: KVNamespace
+	const __STATIC_CONTENT_MANIFEST: string
 }
