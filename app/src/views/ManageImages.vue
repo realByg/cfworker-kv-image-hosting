@@ -72,15 +72,9 @@ onMounted(() => {
 })
 
 const deleteImage = (src: string) => {
-	loading.value = true
-
 	const imageID = src.split('/').slice(-1)[0]
-	requestDeleteImage(imageID)
-		.then(() => {
-			uploadedImages.value = uploadedImages.value.filter((item) => item.src !== src)
-		})
-		.finally(() => {
-			loading.value = false
-		})
+	requestDeleteImage(imageID).then(() => {
+		uploadedImages.value = uploadedImages.value.filter((item) => item.src !== src)
+	})
 }
 </script>

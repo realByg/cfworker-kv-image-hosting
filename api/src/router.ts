@@ -9,7 +9,7 @@ const __MANIFEST = JSON.parse(__STATIC_CONTENT_MANIFEST)
 router.get('/', async ({ res }) => {
 	res.headers.set('Content-Type', 'text/html')
 	res.body = await __STATIC_CONTENT.get(__MANIFEST['index.html'], {
-		cacheTtl: 3600
+		cacheTtl: TTL
 	})
 })
 
@@ -17,7 +17,7 @@ router.get('/favicon.ico', async ({ res }) => {
 	res.headers.set('Content-Type', 'image/x-icon')
 	res.body = await __STATIC_CONTENT.get(__MANIFEST['favicon.ico'], {
 		type: 'stream',
-		cacheTtl: 3600
+		cacheTtl: TTL
 	})
 })
 
@@ -36,7 +36,7 @@ router.get(
 			res.headers.set('Content-Type', 'text/css')
 		}
 		res.body = await __STATIC_CONTENT.get(__MANIFEST[`assets/${fileName}`], {
-			cacheTtl: 3600
+			cacheTtl: TTL
 		})
 	}
 )
@@ -51,7 +51,7 @@ router.get(
 	async ({ req, res }) => {
 		const imageID = req.params.imageID
 
-		const imageStream = await ImageKV.get(imageID, { cacheTtl: 3600, type: 'stream' })
+		const imageStream = await ImageKV.get(imageID, { cacheTtl: TTL, type: 'stream' })
 		if (!imageStream) {
 			res.status = 404
 			return
