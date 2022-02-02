@@ -25,6 +25,7 @@
 	},
 	"dependencies": {
 		"@cfworker/web": "^1.12.1",
+		"nanoid": "^3.2.0",
 		"spark-md5": "^3.0.2"
 	}
 }

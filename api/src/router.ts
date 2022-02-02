@@ -1,6 +1,7 @@
 import { Router, validate } from '@cfworker/web'
 import type { UploadedImage } from './utils/types'
 import { ArrayBuffer as md5ArrayBuffer } from 'spark-md5'
+import { nanoid } from 'nanoid'
 
 const router = new Router()
 
@@ -9,7 +10,7 @@ const __MANIFEST = JSON.parse(__STATIC_CONTENT_MANIFEST)
 router.get('/', async ({ res }) => {
 	res.headers.set('Content-Type', 'text/html')
 	res.body = await __STATIC_CONTENT.get(__MANIFEST['index.html'], {
-		cacheTtl: TTL
+		cacheTtl: Number(TTL)
 	})
 })
 
@@ -17,7 +18,7 @@ router.get('/favicon.ico', async ({ res }) => {
 	res.headers.set('Content-Type', 'image/x-icon')
 	res.body = await __STATIC_CONTENT.get(__MANIFEST['favicon.ico'], {
 		type: 'stream',
-		cacheTtl: TTL
+		cacheTtl: Number(TTL)
 	})
 })
 
@@ -36,7 +37,7 @@ router.get(
 			res.headers.set('Content-Type', 'text/css')
 		}
 		res.body = await __STATIC_CONTENT.get(__MANIFEST[`assets/${fileName}`], {
-			cacheTtl: TTL
+			cacheTtl: Number(TTL)
 		})
 	}
 )
@@ -51,7 +52,7 @@ router.get(
 	async ({ req, res }) => {
 		const imageID = req.params.imageID
 
-		const imageStream = await ImageKV.get(imageID, { cacheTtl: TTL, type: 'stream' })
+		const imageStream = await ImageKV.get(imageID, { cacheTtl: Number(TTL), type: 'stream' })
 		if (!imageStream) {
 			res.status = 404
 			return
@@ -86,7 +87,12 @@ router.post('/api/imgs', async ({ req, res }) => {
 
 	for (let item of images) {
 		if (typeof item !== 'string') {
-			const imageID = md5ArrayBuffer.hash(await item.arrayBuffer()).slice(0, 8)
+			let imageID: string
+			if (DEDUPE === 'true') {
+				imageID = md5ArrayBuffer.hash(await item.arrayBuffer()).slice(0, 8)
+			} else {
+				imageID = nanoid(8)
+			}
 
 			await ImageKV.put(imageID, item.stream(), {
 				expiration,
