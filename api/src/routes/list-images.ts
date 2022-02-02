@@ -4,7 +4,7 @@ import type { UploadedImage } from '../utils/types'
 const listImages: Middleware = async ({ req, res }) => {
 	const uploadedImages: UploadedImage[] = []
 
-	const kvList = await KV.list()
+	const kvList = await ImageKV.list()
 	for (let item of kvList.keys) {
 		uploadedImages.push({
 			id: item.name,

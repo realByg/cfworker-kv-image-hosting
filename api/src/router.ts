@@ -6,8 +6,11 @@ import deteleImageByID from './routes/delete-image-by-id'
 
 const router = new Router()
 
-router.get('/', ({ res }) => {
-	res.status = 200
+router.get('/bruh', async ({ req, res }) => {
+	res.body = await __STATIC_CONTENT.get('favicon.f343726eb1.ico', 'stream')
+})
+
+router.get('/', async ({ req, res }) => {
 	res.body = ENV
 })
 
@@ -27,9 +30,13 @@ router.post('/api/imgs', uploadImages)
 
 router.delete('/api/img', deteleImageByID)
 
-// cors options
 router.all('/(.*)', ({ res }) => {
-	res.status = 200
+	if (ENV === 'dev') {
+		// cors options
+		res.status = 200
+	} else {
+		res.redirect('/')
+	}
 })
 
 export default router

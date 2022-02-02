@@ -5,7 +5,7 @@ const uploadImages: Middleware = async ({ req, res }) => {
 	const convertedImage: ConvertedImage[] = await req.body.json()
 
 	for (let item of convertedImage) {
-		await KV.put(item.id, item.dataURL, {
+		await ImageKV.put(item.id, item.dataURL, {
 			expiration: item.expiresAt ? Math.floor(item.expiresAt / 1000) : undefined,
 			metadata: {
 				name: item.name,

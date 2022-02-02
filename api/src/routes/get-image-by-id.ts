@@ -4,7 +4,7 @@ import { dataURLToBlob } from 'blob-util'
 const getImageByID: Middleware = async ({ req, res }) => {
 	const imageID = req.params.imageID
 
-	const dataURL = await KV.get(imageID, { cacheTtl: 3600 })
+	const dataURL = await ImageKV.get(imageID, { cacheTtl: 3600 })
 	if (!dataURL) {
 		res.status = 404
 		return
