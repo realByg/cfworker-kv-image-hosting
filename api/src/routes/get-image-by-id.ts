@@ -1,4 +1,4 @@
-import { Middleware } from '@cfworker/web'
+import type { Middleware } from '@cfworker/web'
 import { dataURLToBlob } from 'blob-util'
 
 const getImageByID: Middleware = async ({ req, res }) => {

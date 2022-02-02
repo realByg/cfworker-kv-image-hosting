@@ -1,4 +1,4 @@
-import { Middleware } from '@cfworker/web'
+import type { Middleware } from '@cfworker/web'
 
 const verifyBasicAuth = (auth: string) => {
 	const [scheme, encoded] = auth.split(' ')

@@ -30,11 +30,11 @@
 						:key="item.id"
 					>
 						<image-box
-							:src="item.src"
+							:src="item.tmpSrc"
 							:size="item.dataURL.length"
 							:name="item.name"
-							@delete="removeImage(item.id, item.src)"
-							mode="upload"
+							@delete="removeImage(item.id, item.tmpSrc)"
+							mode="converted"
 						/>
 					</div>
 				</transition-group>
@@ -154,6 +154,15 @@ const input = ref<HTMLInputElement>()
 const loading = ref(false)
 const router = useRouter()
 
+watchEffect(() => {
+	if (imagesHaveExpiration.value) {
+		convertedImages.value = convertedImages.value.map((item) => ({
+			...item,
+			expiresAt: imagesExpiration.value.getTime()
+		}))
+	}
+})
+
 const onInputChange = () => {
 	appendConvertedImages(input.value?.files)
 }
@@ -164,22 +173,13 @@ const onPaste = (e: ClipboardEvent) => {
 	appendConvertedImages(e.clipboardData?.files)
 }
 
-watchEffect(() => {
-	if (imagesHaveExpiration.value) {
-		convertedImages.value = convertedImages.value.map((item) => ({
-			...item,
-			expiresAt: imagesExpiration.value.getTime()
-		}))
-	}
-})
-
 onMounted(() => {
 	document.onpaste = onPaste
 })
 
 onUnmounted(() => {
 	document.onpaste = null
-	convertedImages.value.forEach((item) => URL.revokeObjectURL(item.src))
+	convertedImages.value.forEach((item) => URL.revokeObjectURL(item.tmpSrc))
 })
 
 const appendConvertedImages = async (files: FileList | null | undefined) => {
@@ -213,9 +213,8 @@ const appendConvertedImages = async (files: FileList | null | undefined) => {
 				id,
 				name: file.name,
 				dataURL,
-				src: URL.createObjectURL(file),
-				size: dataURL.length,
-				uploadedAt: 0
+				tmpSrc: URL.createObjectURL(file),
+				expiresAt: 0
 			}
 		]
 	}

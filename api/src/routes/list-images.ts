@@ -1,23 +1,22 @@
-import { Middleware } from '@cfworker/web'
-import { ConvertedImage } from '../utils/types'
+import type { Middleware } from '@cfworker/web'
+import type { UploadedImage } from '../utils/types'
 
 const listImages: Middleware = async ({ req, res }) => {
-	const convertedImages: ConvertedImage[] = []
+	const uploadedImages: UploadedImage[] = []
 
 	const kvList = await KV.list()
 	for (let item of kvList.keys) {
-		convertedImages.push({
+		uploadedImages.push({
 			id: item.name,
 			name: item.metadata['name'],
-			dataURL: '',
 			src: `${ENV === 'dev' ? 'http://127.0.0.1:8787' : req.url.origin}/img/${item.name}`,
-			uploadedAt: item.metadata['uploadedAt'],
+			uploadedAt: item.metadata['uploadedAt'] || 0,
 			expiresAt: item.expiration * 1000,
-			size: item.metadata['size']
+			size: item.metadata['size'] || 0
 		})
 	}
 
-	res.body = convertedImages
+	res.body = uploadedImages
 }
 
 export default listImages

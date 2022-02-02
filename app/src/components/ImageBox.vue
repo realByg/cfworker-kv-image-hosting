@@ -14,20 +14,20 @@
 						</el-tooltip>
 					</div>
 					<font-awesome-icon
-						v-if="props.mode === 'upload'"
+						v-if="props.mode === 'converted'"
 						:icon="faTimesCircle"
 						class="cursor-pointer"
 						@click="emit('delete')"
 					></font-awesome-icon>
 				</div>
 				<div class="text-xs text-gray-300">
-					{{ formatBytes(props.size) }},
+					{{ formatBytes(props.size) }}
 					<span v-if="props.uploadedAt">
-						{{ new Date(props.uploadedAt).toLocaleDateString() }}
+						, {{ new Date(props.uploadedAt).toLocaleDateString() }}
 					</span>
 				</div>
 			</div>
-			<div v-if="props.mode === 'manage'">
+			<div v-if="props.mode === 'uploaded'">
 				<el-divider class="m-0" />
 				<div class="p-2 text-sm text-white">
 					<div v-if="props.expiresAt">
@@ -49,7 +49,7 @@ const props = defineProps<{
 	src: string
 	name: string
 	size: number
-	mode: 'upload' | 'manage'
+	mode: 'converted' | 'uploaded'
 	uploadedAt?: number
 	expiresAt?: number
 }>()
