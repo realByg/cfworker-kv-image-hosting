@@ -5,42 +5,44 @@ import { nanoid } from 'nanoid'
 
 const router = new Router()
 
-const __MANIFEST = JSON.parse(__STATIC_CONTENT_MANIFEST)
+if (ENV === 'prod') {
+	const __MANIFEST = JSON.parse(__STATIC_CONTENT_MANIFEST)
 
-router.get('/', async ({ res }) => {
-	res.headers.set('Content-Type', 'text/html')
-	res.body = await __STATIC_CONTENT.get(__MANIFEST['index.html'], {
-		cacheTtl: Number(TTL)
-	})
-})
-
-router.get('/favicon.ico', async ({ res }) => {
-	res.headers.set('Content-Type', 'image/x-icon')
-	res.body = await __STATIC_CONTENT.get(__MANIFEST['favicon.ico'], {
-		type: 'stream',
-		cacheTtl: Number(TTL)
-	})
-})
-
-router.get(
-	'/assets/:fileName',
-	validate({
-		params: {
-			required: ['fileName']
-		}
-	}),
-	async ({ req, res }) => {
-		const fileName = req.params.fileName
-		if (fileName.endsWith('.js')) {
-			res.headers.set('Content-Type', 'application/javascript')
-		} else if (fileName.endsWith('.css')) {
-			res.headers.set('Content-Type', 'text/css')
-		}
-		res.body = await __STATIC_CONTENT.get(__MANIFEST[`assets/${fileName}`], {
+	router.get('/', async ({ res }) => {
+		res.headers.set('Content-Type', 'text/html')
+		res.body = await __STATIC_CONTENT.get(__MANIFEST['index.html'], {
 			cacheTtl: Number(TTL)
 		})
-	}
-)
+	})
+
+	router.get('/favicon.ico', async ({ res }) => {
+		res.headers.set('Content-Type', 'image/x-icon')
+		res.body = await __STATIC_CONTENT.get(__MANIFEST['favicon.ico'], {
+			type: 'stream',
+			cacheTtl: Number(TTL)
+		})
+	})
+
+	router.get(
+		'/assets/:fileName',
+		validate({
+			params: {
+				required: ['fileName']
+			}
+		}),
+		async ({ req, res }) => {
+			const fileName = req.params.fileName
+			if (fileName.endsWith('.js')) {
+				res.headers.set('Content-Type', 'application/javascript')
+			} else if (fileName.endsWith('.css')) {
+				res.headers.set('Content-Type', 'text/css')
+			}
+			res.body = await __STATIC_CONTENT.get(__MANIFEST[`assets/${fileName}`], {
+				cacheTtl: Number(TTL)
+			})
+		}
+	)
+}
 
 router.get(
 	'/img/:imageID',

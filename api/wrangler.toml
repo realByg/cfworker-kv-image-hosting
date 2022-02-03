@@ -4,18 +4,18 @@ type = 'webpack'
 webpack_config = 'webpack.config.js'
 compatibility_date = '2021-12-14'
 
+
 [env.dev]
-ip = '127.0.0.1'
-port = 8787
 
   [env.dev.vars]
   ENV = 'dev'
-  TTL = 10
+  TTL = 60
   DEDUPE = false
 
   [[env.dev.kv_namespaces]]
   binding = 'ImageKV'
   preview_id = '873d3300fc41484fbce49b11d533a6b8'
+
 
 [env.prod]
 
@@ -30,6 +30,11 @@ port = 8787
   binding = 'ImageKV'
   id = '873d3300fc41484fbce49b11d533a6b8'
 
-[site]
-bucket = '../app/dist'
-entry-point = 'workers-site'
+  [env.prod.site]
+  bucket = '../app/dist'
+  entry-point = 'workers-site'
+
+
+[dev]
+ip = '127.0.0.1'
+port = 8787
