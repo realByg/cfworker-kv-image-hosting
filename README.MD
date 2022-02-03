@@ -25,13 +25,12 @@ await KV_NAMESPACE.put(key, item.stream(), {
 
 > 环境：Nodejs 14 +
 
-1. 安装 Cloudflare workers 的 CLI 工具 [wrangler](https://developers.cloudflare.com/workers/cli-wrangler/install-update)
+1. 安装 Cloudflare workers 的 CLI 工具 [wrangler](https://developers.cloudflare.com/workers/cli-wrangler/install-update) 并登录
 
     ```bash
     npm i @cloudflare/wrangler -g
+    wrangler login
     ```
-
-    并运行 `wrangler login` 登录 Cloudflare 账号
 
 2. 下载或 `git clone` 仓库到本地并安装所需环境
 
