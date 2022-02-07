@@ -1,6 +1,11 @@
 import type { Middleware } from '@cfworker/web'
 
-const cors: Middleware = async ({ res }, next) => {
+const cors: Middleware = async ({ req, res }, next) => {
+	if (req.method === 'OPTIONS') {
+		res.status = 200
+		return
+	}
+
 	res.headers.set('Access-Control-Allow-Origin', '*')
 	res.headers.set('Access-Control-Allow-Credentials', 'true')
 	res.headers.set('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, HEAD, OPTIONS')
