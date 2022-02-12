@@ -1,8 +1,8 @@
 import { Router, validate } from '@cfworker/web'
-import getImageByID from './routes/get-image-by-id'
-import listImages from './routes/list-images'
-import uploadImages from './routes/upload-images'
-import deleteImage from './routes/delete-image'
+import getImageByID from '../routes/get-image-by-id'
+import listImages from '../routes/list-images'
+import uploadImages from '../routes/upload-images'
+import deleteImage from '../routes/delete-image'
 
 const router = new Router()
 
@@ -20,6 +20,6 @@ router.post('/api/imgs', uploadImages)
 
 router.delete('/api/img', deleteImage)
 
-router.all('/(.*)', ({ res }) => res.redirect('/'))
+router.all('/(.+)', ({ res }) => res.redirect('/'))
 
 export default router
